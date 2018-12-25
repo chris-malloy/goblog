@@ -8,5 +8,5 @@ import (
 
 func TestAPI(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Health Check API Unit Tests Suite")
+	RunSpecs(t, "Goblog API Unit Tests Suite")
 }
