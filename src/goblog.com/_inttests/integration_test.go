@@ -1,7 +1,7 @@
 package _inttests
 
 import (
-	"7factor.io/api"
+	"goblog.com/api"
 	"bytes"
 	"encoding/json"
 	. "github.com/onsi/ginkgo"
@@ -15,7 +15,7 @@ import (
 
 func TestAPI(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "LoadUp API Integration Test Suite")
+	RunSpecs(t, "Goblog API Integration Test Suite")
 }
 
 // Helper methods for running GET/POST/PUT methods without boiler plate

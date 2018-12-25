@@ -1,7 +1,7 @@
 package main
 
 import (
-	"7factor.io/api"
+	"goblog.com/api"
 	"net/http"
 	"os"
 

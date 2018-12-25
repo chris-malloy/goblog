@@ -14,8 +14,8 @@ COPY ./src/glide.lock src/
 COPY ./src/glide.yaml src/
 
 RUN cd src && glide install
-COPY ./src/7factor.io src/7factor.io
+COPY ./src/goblog.com src/goblog.com
 
-RUN go install 7factor.io/...
+RUN go install goblog.com/...
 
 CMD ["/go/bin/server"]

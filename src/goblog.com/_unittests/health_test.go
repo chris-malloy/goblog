@@ -1,9 +1,9 @@
 package _unittests
 
 import (
-	"7factor.io/api"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"goblog.com/api"
 	"net/http"
 	"net/http/httptest"
 )
