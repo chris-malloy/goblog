@@ -2,7 +2,7 @@
 # modifications to the original compose file.
 version: "3"
 services: 
-  api:
+  goblog:
     env_file: ./env/stage/stage.env
     image: api:stage
     build:

@@ -2,4 +2,4 @@
 # before parameterizing for a given environment.
 version: "3"
 services:
-  api:
+  goblog:

@@ -14,4 +14,4 @@ docker-compose -f docker-compose.yml -f env/$1/docker-compose.$1.yml build
 # to be live before it can successfully wake up
 docker-compose -f docker-compose.yml \
 -f env/$1/docker-compose.$1.yml run \
---entrypoint "/bin/bash -c \"sleep 3; /go/bin/server & go test -v goblog.com/_inttests \"" api
+--entrypoint "/bin/bash -c \"sleep 3; /go/bin/server & go test -v goblog.com/_inttests \"" goblog
