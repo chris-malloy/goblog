@@ -1,9 +1,6 @@
-FROM golang:alpine
+FROM golang:1.10-alpine
 
-RUN apk add --update bash &&\
-    apk add --update curl &&\
-    apk add --update git &&\
-    rm -rf /var/cache/apk/*
+RUN apk add --no-cache bash curl git
 RUN curl https://glide.sh/get | sh
 
 # Set work dir.
