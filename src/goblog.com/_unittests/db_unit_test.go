@@ -31,6 +31,14 @@ var _ = Describe("The Creds Function", func() {
 			Expect(connStr).To(Equal("postgres://samus:aran@localhost:5432/metroid"))
 		})
 
+		It("Should handle optional db arguments", func() {
+			os.Setenv("DB_OPTN", "sslmode=disable")
+			creds, err := db.GetCredsFromEnv()
+
+			Expect(err).To(BeNil(), "Creds error should be nil")
+			Expect(creds.ToConnectionString()).To(ContainSubstring("sslmode=disable"))
+		})
+
 		It("Should convert a valid connection string with options", func() {
 			os.Setenv("DB_OPTN", "sslmode=disable")
 			creds, err := db.GetCredsFromEnv()
