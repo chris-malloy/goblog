@@ -45,5 +45,14 @@ const dbConnectionTemplate = `postgres://%s:%s@%s:5432/%s`
 func (c Creds) ToConnectionString() string {
 	connStr := fmt.Sprintf(dbConnectionTemplate, c.user, c.pass, c.host, c.dbname)
 
+	connStr = appendOptions(connStr, c.options)
+
+	return connStr
+}
+
+func appendOptions(connStr string, options string) string {
+	if len(options) > 0 {
+		connStr += "?" + options
+	}
 	return connStr
 }
