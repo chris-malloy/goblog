@@ -1,11 +1,11 @@
 package _inttests
 
 import (
-	"goblog.com/api"
 	"bytes"
 	"encoding/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"goblog.com/api/utils"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -77,7 +77,7 @@ func ensureAndValidatePayload(response *http.Response, expectedStatusCode int, f
 }
 
 func expectEmptyObjectAnd200(response *http.Response) {
-	var null api.EmptyObject
+	var null utils.EmptyObject
 	Expect(response.StatusCode).To(Equal(http.StatusOK))
 
 	body, err := ioutil.ReadAll(response.Body)
@@ -89,7 +89,7 @@ func expectEmptyObjectAnd200(response *http.Response) {
 }
 
 func expectEmptyListAnd200(response *http.Response) {
-	var null []api.EmptyObject
+	var null []utils.EmptyObject
 	Expect(response.StatusCode).To(Equal(http.StatusOK))
 
 	body, err := ioutil.ReadAll(response.Body)

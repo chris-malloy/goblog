@@ -3,7 +3,7 @@ package _unittests
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"goblog.com/api"
+	"goblog.com/api/handlers"
 	"net/http"
 	"net/http/httptest"
 )
@@ -15,7 +15,7 @@ var _ = Describe("Health check handler", func() {
 			Expect(err).To(BeNil())
 
 			recorder := httptest.NewRecorder()
-			handler := api.HealthCheck()
+			handler := handlers.HealthCheck()
 			handler.ServeHTTP(recorder, request)
 
 			Expect(recorder.Code).To(Equal(http.StatusOK))
