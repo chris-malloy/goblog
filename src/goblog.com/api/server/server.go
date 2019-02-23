@@ -1,7 +1,7 @@
 package main
 
 import (
-	"goblog.com/api/handlers"
+	"goblog.com/api/healthcheck"
 	"net/http"
 	"os"
 	"time"
@@ -29,6 +29,6 @@ func main() {
 
 	// Please note that patterns for the URLs below must match
 	// EXACTLY, including no trailing slashes.
-	router.Get("/status", handlers.HealthCheck())
+	router.Get("/status", healthcheck.HealthCheck())
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
