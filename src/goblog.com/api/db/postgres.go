@@ -1,8 +1,10 @@
 package db
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	_ "github.com/lib/pq"
 	"os"
 )
 
@@ -12,6 +14,11 @@ type Creds struct {
 	pass    string
 	dbname  string
 	options string
+}
+
+func NewDBConnection(creds *Creds) (*sql.DB, error) {
+	connectionString := creds.ToConnectionString()
+	return sql.Open("postgres", connectionString)
 }
 
 func GetCredsFromEnv() (*Creds, error) {

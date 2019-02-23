@@ -1,6 +1,7 @@
 package _unittests
 
 import (
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"goblog.com/api/db"
@@ -48,11 +49,22 @@ var _ = Describe("The Creds Function", func() {
 			Expect(connStr).To(Equal("postgres://samus:aran@localhost:5432/metroid?sslmode=disable"))
 		})
 
+		It("Should load a non-nil db", func() {
+			creds, err := db.GetCredsFromEnv()
+			Expect(err).To(BeNil(), fmt.Sprintf("Creds error should be nil but is %s", err))
+
+			db, err := db.NewDBConnection(creds)
+
+			Expect(err).To(BeNil(), fmt.Sprintf("DB error should be nil but is %s", err))
+			Expect(db).ToNot(BeNil(), "DB should not be nil")
+		})
+
 		AfterEach(func() {
 			os.Unsetenv("DB_HOST")
 			os.Unsetenv("DB_USER")
 			os.Unsetenv("DB_PASS")
 			os.Unsetenv("DB_NAME")
+			os.Unsetenv("DB_OPTN")
 		})
 	})
 })
