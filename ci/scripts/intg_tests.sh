@@ -15,3 +15,6 @@ docker-compose -f docker-compose.yml -f env/$1/docker-compose.$1.yml build
 docker-compose -f docker-compose.yml \
 -f env/$1/docker-compose.$1.yml run \
 --entrypoint "/bin/bash -c \"sleep 3; /go/bin/server & go test -v goblog.com/_inttests \"" goblog
+
+# cleanup
+docker-compose -f docker-compose.yml -f env/$1/docker-compose.$1.yml down
