@@ -21,6 +21,7 @@ var _ = Describe("The Creds Function", func() {
 			os.Setenv("DB_USER", "samus")
 			os.Setenv("DB_PASS", "aran")
 			os.Setenv("DB_HOST", "localhost")
+			os.Setenv("DB_PORT", "5432")
 			os.Setenv("DB_NAME", "metroid")
 		})
 
@@ -63,6 +64,7 @@ var _ = Describe("The Creds Function", func() {
 			os.Unsetenv("DB_HOST")
 			os.Unsetenv("DB_USER")
 			os.Unsetenv("DB_PASS")
+			os.Unsetenv("DB_PORT")
 			os.Unsetenv("DB_NAME")
 			os.Unsetenv("DB_OPTN")
 		})

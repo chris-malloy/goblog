@@ -18,7 +18,6 @@ var _ = Describe("Render HTTP Errors functions", func() {
 
 	Context("When given complete inputs", func() {
 		It("Should render the error correctly", func() {
-
 			expectedStatus := http.StatusBadRequest
 			expectedBody := `{ "status": 400, "message": "test error" }`
 
