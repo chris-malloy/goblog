@@ -1,6 +1,8 @@
-hash: 32acb34ffa81c8753c9b79f91afe7aa842ad63602d1729c53c2d67266a886725
-updated: 2019-02-23T11:10:22.274208-05:00
+hash: 843625f9cd902f1d752dc093084fd0a0e60e5730e3445572ad75db9d8fcb4d72
+updated: 2019-02-23T15:24:08.367887-05:00
 imports:
+- name: github.com/DATA-DOG/go-sqlmock
+  version: 472e287dbafe67e526a3797165b64cb14f34705a
 - name: github.com/hpcloud/tail
   version: a30252cb686a21eb2d0b98132633053ec2f7f1e5
 - name: github.com/husobee/vestigo
