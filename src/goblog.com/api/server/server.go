@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"github.com/husobee/vestigo"
 	log "github.com/sirupsen/logrus"
 	"goblog.com/api/db"
@@ -28,25 +27,11 @@ func main() {
 	})
 
 	// set up all of the database connections
-	dbConn := getDBOrPanic()
+	dbConn := db.GetDBOrPanic()
 
 	// Please note that patterns for the URLs below must match
 	// EXACTLY, including no trailing slashes.
 	router.Get("/status", healthcheck.HealthCheck())
 	router.Get("/dbaccess", healthcheck.DBAccess(dbConn))
 	log.Fatal(http.ListenAndServe(":"+port, router))
-}
-
-func getDBOrPanic() *sql.DB {
-	creds, err := db.GetCredsFromEnv()
-	if err != nil {
-		log.WithError(err).Fatal("Unable to start server. DBCreds are invalid.")
-	}
-
-	connection, err := db.NewDBConnection(creds)
-	if err != nil {
-		log.WithError(err).Fatal("Unable to start server. Cannot create a DB instance.")
-	}
-
-	return connection
 }
