@@ -10,10 +10,16 @@ import (
 
 var _ = Describe("User Functions", func() {
 	DescribeTable("When validating an email address", emailValidatorCallback,
-		Entry("it errors with a nil email.", nil, false),
-		Entry("it errors if it does not contain the `@` symbol.", "this is not an email", false),
 		Entry("it validates a good email.", "christopher.malloy@7factor.io", true),
 		Entry("it validates a weird email.", "thisisweird@ something.com", true),
+		Entry("it errors with a nil email.", nil, false),
+		Entry("it errors if it does not contain the `@` symbol.", "this is not an email", false),
+	)
+
+	DescribeTable("When validating a password", passwordValidatorCallback,
+		Entry("it validates a good password.", "abCde1234@", true),
+		Entry("it errors with a nil password.", nil, false),
+		Entry("it errors with no uppercase characters.", "abcd1234$", false),
 	)
 
 	Context("When creating a new user manager", func() {

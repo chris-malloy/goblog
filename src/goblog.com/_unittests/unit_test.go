@@ -26,3 +26,8 @@ func emailValidatorCallback(testCase string, shouldValidate bool) {
 	newValidator := handlers.ValidateEmail(testCase)
 	checkValidator(newValidator, shouldValidate)
 }
+
+func passwordValidatorCallback(testCase string, shouldValidate bool) {
+	newValidator := handlers.ValidatePassword(testCase)
+	checkValidator(newValidator, shouldValidate)
+}
