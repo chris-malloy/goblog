@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"goblog.com/api/handlers"
-	"goblog.com/api/utils"
+	. "goblog.com/api/utils"
 	"testing"
 )
 
@@ -13,12 +13,16 @@ func TestAPI(t *testing.T) {
 	RunSpecs(t, "Goblog API Unit Tests Suite")
 }
 
-func emailValidator(testCase string, shouldValidate bool) {
-	newValidator := handlers.ValidateEmail(testCase)
-	Expect(newValidator.Ok).To(Equal(shouldValidate))
+func checkValidator(validator Validator, shouldValidate bool) {
+	Expect(validator.Ok).To(Equal(shouldValidate))
 
 	if !shouldValidate {
-		Expect(newValidator.ErrMsg).ToNot(BeNil())
-		Expect(newValidator.ErrMsg).To(BeAssignableToTypeOf(utils.ValidationError{}))
+		Expect(validator.ErrMsg).ToNot(BeNil())
+		Expect(validator.ErrMsg).To(BeAssignableToTypeOf(ValidationError{}))
 	}
+}
+
+func emailValidatorCallback(testCase string, shouldValidate bool) {
+	newValidator := handlers.ValidateEmail(testCase)
+	checkValidator(newValidator, shouldValidate)
 }

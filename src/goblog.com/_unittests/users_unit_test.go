@@ -9,7 +9,7 @@ import (
 )
 
 var _ = Describe("User Functions", func() {
-	DescribeTable("When validating an email address", emailValidator,
+	DescribeTable("When validating an email address", emailValidatorCallback,
 		Entry("it errors with a nil email.", nil, false),
 		Entry("it errors if it does not contain the `@` symbol.", "this is not an email", false),
 		Entry("it validates a good email.", "christopher.malloy@7factor.io", true),
