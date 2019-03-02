@@ -8,26 +8,6 @@ import (
 	"net/http"
 )
 
-// Validation error
-type ValidationError struct {
-	message string
-}
-
-func (e ValidationError) Error() string {
-	return e.message
-}
-
-func NewValidationError(text string) error {
-	return ValidationError{text}
-}
-
-func NewValidationErrorFromError(err error) error {
-	return ValidationError{err.Error()}
-}
-
-// Private, package level functions for handling error messages being
-// written in JSON to a writer buffer. Simple. I like this better than
-// hacking some interface weirdness.
 var errorTemplate = `{ "status": %v, "message": "%s" }`
 
 func RenderErrorAndDeriveStatus(writer http.ResponseWriter, err error) {
