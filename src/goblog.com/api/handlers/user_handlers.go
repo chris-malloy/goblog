@@ -18,7 +18,7 @@ func ValidateEmail(email string) Validator {
 	return Validator{Ok: true, ErrMsg: nil}
 }
 
-var generalPasswordErrorMessage = "Password must contain at least one special character, a number, and an uppercase character."
+var generalPasswordErrorMessage = "Password must contain at least one special character, a number, a lowercase character, and an uppercase character."
 
 func ValidatePassword(password string) Validator {
 	if isLongEnough(password, 8) {
@@ -30,7 +30,12 @@ func ValidatePassword(password string) Validator {
 		return Validator{Ok: false, ErrMsg: NewValidationErrorFromError(err)}
 	}
 
-	if !hasRegex(upperCaseRegex, password) {
+	lowerCaseRegex, err := compileRegex(`.*[a-z]+.*`)
+	if err != nil {
+		return Validator{Ok: false, ErrMsg: NewValidationErrorFromError(err)}
+	}
+
+	if !hasRegex(upperCaseRegex, password) || !hasRegex(lowerCaseRegex, password) {
 		return Validator{Ok: false, ErrMsg: NewValidationError(generalPasswordErrorMessage)}
 	}
 

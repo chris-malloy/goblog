@@ -20,6 +20,7 @@ var _ = Describe("User Functions", func() {
 		Entry("it validates a good password.", "abCde1234@", true),
 		Entry("it errors with a nil password.", nil, false),
 		Entry("it errors with no uppercase characters.", "abcd1234$", false),
+		Entry("it errors if it has no lowercase characters.", "ABCD1234$", false),
 		Entry("it errors if it's shorter than required.", "Ab1@", false),
 	)
 
