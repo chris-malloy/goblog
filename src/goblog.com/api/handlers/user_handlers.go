@@ -40,7 +40,13 @@ func ValidatePassword(password string) Validator {
 		return Validator{Ok: false, ErrMsg: NewValidationErrorFromError(err)}
 	}
 
-	if !hasRegex(upperCaseRegex, password) || !hasRegex(lowerCaseRegex, password) || !hasRegex(symbolRegex, password) {
+	numberRegex, err := compileRegex(`.*\d+.*`)
+	if err != nil {
+		return Validator{Ok: false, ErrMsg: NewValidationErrorFromError(err)}
+	}
+
+	if !hasRegex(upperCaseRegex, password) || !hasRegex(lowerCaseRegex, password) ||
+		!hasRegex(symbolRegex, password) || !hasRegex(numberRegex, password) {
 		return Validator{Ok: false, ErrMsg: NewValidationError(generalPasswordErrorMessage)}
 	}
 
