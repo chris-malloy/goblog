@@ -7,7 +7,7 @@ import (
 )
 
 func ValidateEmail(email string) Validator {
-	if isLongEnough(email) {
+	if isLongEnough(email, 0) {
 		return Validator{Ok: false, ErrMsg: NewValidationError("email cannot be empty")}
 	}
 
@@ -21,26 +21,34 @@ func ValidateEmail(email string) Validator {
 var generalPasswordErrorMessage = "Password must contain at least one special character, a number, and an uppercase character."
 
 func ValidatePassword(password string) Validator {
-	if isLongEnough(password) {
-		return Validator{Ok: false, ErrMsg: NewValidationError("password cannot be empty")}
+	if isLongEnough(password, 8) {
+		return Validator{Ok: false, ErrMsg: NewValidationError("Password must be at least 8 characters long.")}
 	}
 
-	hasUpperCase, err := regexp.Compile(`.*[A-Z]+.*`)
+	upperCaseRegex, err := compileRegex(`.*[A-Z]+.*`)
 	if err != nil {
 		return Validator{Ok: false, ErrMsg: NewValidationErrorFromError(err)}
 	}
 
-	if !hasUpperCase.MatchString(password) {
+	if !hasRegex(upperCaseRegex, password) {
 		return Validator{Ok: false, ErrMsg: NewValidationError(generalPasswordErrorMessage)}
 	}
 
 	return Validator{Ok: true, ErrMsg: nil}
 }
 
-func isLongEnough(string string) bool {
-	return len(string) <= 0
+func isLongEnough(string string, length int) bool {
+	return len(string) <= length
 }
 
 func containsDesiredCharacters(string string) bool {
 	return !strings.Contains(string, "@")
+}
+
+func compileRegex(regexMatcher string) (*regexp.Regexp, error) {
+	return regexp.Compile(regexMatcher)
+}
+
+func hasRegex(compliedRegex *regexp.Regexp, string string) bool {
+	return compliedRegex.MatchString(string)
 }
