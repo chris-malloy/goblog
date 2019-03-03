@@ -22,6 +22,7 @@ var _ = Describe("User Functions", func() {
 		Entry("it errors with no uppercase characters.", "abcd1234$", false),
 		Entry("it errors if it has no lowercase characters.", "ABCD1234$", false),
 		Entry("it errors if it's shorter than required.", "Ab1@", false),
+		Entry("it errors if it has no symbols.", "AbCd12345", false),
 	)
 
 	Context("When creating a new user manager", func() {
