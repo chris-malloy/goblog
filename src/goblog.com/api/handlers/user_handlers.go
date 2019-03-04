@@ -6,6 +6,17 @@ import (
 	"strings"
 )
 
+type NewUserRequest struct {
+	Email     string
+	FirstName string
+	LastName  string
+	Password  string
+}
+
+func ValidateNewUserRequest(newUser NewUserRequest) Validator {
+	return ValidateEmail(newUser.Email)
+}
+
 func ValidateEmail(email string) Validator {
 	if isLongEnough(email, 0) {
 		return Validator{Ok: false, ErrMsg: NewValidationError("email cannot be empty")}
@@ -18,11 +29,12 @@ func ValidateEmail(email string) Validator {
 	return Validator{Ok: true, ErrMsg: nil}
 }
 
+var passwordLengthErrorMessage = "Password must be at least 8 characters long."
 var generalPasswordErrorMessage = "Password must contain at least one special character, a number, a lowercase character, and an uppercase character."
 
 func ValidatePassword(password string) Validator {
 	if isLongEnough(password, 8) {
-		return Validator{Ok: false, ErrMsg: NewValidationError("Password must be at least 8 characters long.")}
+		return Validator{Ok: false, ErrMsg: NewValidationError(passwordLengthErrorMessage)}
 	}
 
 	upperCaseRegex, err := compileRegex(`.*[A-Z]+.*`)

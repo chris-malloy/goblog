@@ -5,8 +5,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
+	"goblog.com/api/handlers"
 	"goblog.com/api/models"
 )
+
+var badPasswordRequest = handlers.NewUserRequest{Email: "not an email", FirstName: "Chris", LastName: "Malloy", Password: "Abdcef123@"}
 
 var _ = Describe("User Functions", func() {
 	DescribeTable("When validating an email address", emailValidatorCallback,
@@ -25,6 +28,14 @@ var _ = Describe("User Functions", func() {
 		Entry("it errors if it has no symbols.", "AbCd12345", false),
 		Entry("it errors if it contains no numbers.", "AbCdefgh%", false),
 	)
+
+	Context("When validating a new user request", func() {
+		It("Fails with a bad email", func() {
+			validator := handlers.ValidateNewUserRequest(badPasswordRequest)
+			Expect(validator.Ok).To(BeFalse())
+			Expect(validator.ErrMsg).ToNot(BeNil())
+		})
+	})
 
 	Context("When creating a new user manager", func() {
 		It("Returns the user manager when given a valid database handle.", func() {
