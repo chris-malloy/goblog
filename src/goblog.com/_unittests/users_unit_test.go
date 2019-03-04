@@ -11,6 +11,7 @@ import (
 
 var badEmailRequest = handlers.NewUserRequest{Email: "not an email", FirstName: "Chris", LastName: "Malloy", Password: "Abdcef123@"}
 var badPasswordRequest = handlers.NewUserRequest{Email: "goodemail@good.com", FirstName: "Chris", LastName: "Malloy", Password: "badpassword"}
+var goodUserRequest = handlers.NewUserRequest{Email: "goodemail@good.com", FirstName: "Chris", LastName: "Malloy", Password: "Abdcef123@"}
 
 var _ = Describe("User Functions", func() {
 	DescribeTable("When validating an email address", emailValidatorCallback,
@@ -41,6 +42,12 @@ var _ = Describe("User Functions", func() {
 			validator := handlers.ValidateNewUserRequest(badPasswordRequest)
 			Expect(validator.Ok).To(BeFalse())
 			Expect(validator.ErrMsg).ToNot(BeNil())
+		})
+
+		It("Succeeds with a valid reequest", func() {
+			validator := handlers.ValidateNewUserRequest(goodUserRequest)
+			Expect(validator.Ok).To(BeTrue())
+			Expect(validator.ErrMsg).To(BeNil())
 		})
 	})
 
