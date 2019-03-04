@@ -9,7 +9,8 @@ import (
 	"goblog.com/api/models"
 )
 
-var badPasswordRequest = handlers.NewUserRequest{Email: "not an email", FirstName: "Chris", LastName: "Malloy", Password: "Abdcef123@"}
+var badEmailRequest = handlers.NewUserRequest{Email: "not an email", FirstName: "Chris", LastName: "Malloy", Password: "Abdcef123@"}
+var badPasswordRequest = handlers.NewUserRequest{Email: "goodemail@good.com", FirstName: "Chris", LastName: "Malloy", Password: "badpassword"}
 
 var _ = Describe("User Functions", func() {
 	DescribeTable("When validating an email address", emailValidatorCallback,
@@ -31,6 +32,12 @@ var _ = Describe("User Functions", func() {
 
 	Context("When validating a new user request", func() {
 		It("Fails with a bad email", func() {
+			validator := handlers.ValidateNewUserRequest(badEmailRequest)
+			Expect(validator.Ok).To(BeFalse())
+			Expect(validator.ErrMsg).ToNot(BeNil())
+		})
+
+		It("Fails with a bad password", func() {
 			validator := handlers.ValidateNewUserRequest(badPasswordRequest)
 			Expect(validator.Ok).To(BeFalse())
 			Expect(validator.ErrMsg).ToNot(BeNil())

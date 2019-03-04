@@ -14,7 +14,16 @@ type NewUserRequest struct {
 }
 
 func ValidateNewUserRequest(newUser NewUserRequest) Validator {
-	return ValidateEmail(newUser.Email)
+	validator := ValidateEmail(newUser.Email)
+	if !validator.Ok {
+		return validator
+	}
+	validator = ValidatePassword(newUser.Password)
+	if !validator.Ok {
+		return validator
+	}
+
+	return validator
 }
 
 func ValidateEmail(email string) Validator {
