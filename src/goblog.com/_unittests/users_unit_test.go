@@ -5,13 +5,13 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
-	"goblog.com/api/handlers"
 	"goblog.com/api/models"
+	"goblog.com/api/utils"
 )
 
-var badEmailRequest = handlers.NewUserRequest{Email: "not an email", FirstName: "Chris", LastName: "Malloy", Password: "Abdcef123@"}
-var badPasswordRequest = handlers.NewUserRequest{Email: "goodemail@good.com", FirstName: "Chris", LastName: "Malloy", Password: "badpassword"}
-var goodUserRequest = handlers.NewUserRequest{Email: "goodemail@good.com", FirstName: "Chris", LastName: "Malloy", Password: "Abdcef123@"}
+var badEmailRequest = models.NewUserRequest{Email: "not an email", FirstName: "Chris", LastName: "Malloy", Password: "Abdcef123@"}
+var badPasswordRequest = models.NewUserRequest{Email: "goodemail@good.com", FirstName: "Chris", LastName: "Malloy", Password: "badpassword"}
+var goodUserRequest = models.NewUserRequest{Email: "goodemail@good.com", FirstName: "Chris", LastName: "Malloy", Password: "Abdcef123@"}
 
 var _ = Describe("User Functions", func() {
 	DescribeTable("When validating an email address", emailValidatorCallback,
@@ -33,19 +33,19 @@ var _ = Describe("User Functions", func() {
 
 	Context("When validating a new user request", func() {
 		It("Fails with a bad email", func() {
-			validator := handlers.ValidateNewUserRequest(badEmailRequest)
+			validator := utils.ValidateNewUserRequest(badEmailRequest)
 			Expect(validator.Ok).To(BeFalse())
 			Expect(validator.ErrMsg).ToNot(BeNil())
 		})
 
 		It("Fails with a bad password", func() {
-			validator := handlers.ValidateNewUserRequest(badPasswordRequest)
+			validator := utils.ValidateNewUserRequest(badPasswordRequest)
 			Expect(validator.Ok).To(BeFalse())
 			Expect(validator.ErrMsg).ToNot(BeNil())
 		})
 
 		It("Succeeds with a valid reequest", func() {
-			validator := handlers.ValidateNewUserRequest(goodUserRequest)
+			validator := utils.ValidateNewUserRequest(goodUserRequest)
 			Expect(validator.Ok).To(BeTrue())
 			Expect(validator.ErrMsg).To(BeNil())
 		})

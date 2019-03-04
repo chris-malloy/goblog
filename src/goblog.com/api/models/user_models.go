@@ -5,6 +5,13 @@ import (
 	"errors"
 )
 
+type NewUserRequest struct {
+	Email     string
+	FirstName string
+	LastName  string
+	Password  string
+}
+
 type userManger struct {
 	db *sql.DB
 }
