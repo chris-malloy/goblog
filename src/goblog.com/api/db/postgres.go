@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-type Creds struct {
+type DBCreds struct {
 	host    string
 	user    string
 	pass    string
@@ -17,12 +17,12 @@ type Creds struct {
 	options string
 }
 
-func NewDBConnection(creds *Creds) (*sql.DB, error) {
+func NewDBConnection(creds *DBCreds) (*sql.DB, error) {
 	connectionString := creds.ToConnectionString()
 	return sql.Open("postgres", connectionString)
 }
 
-func GetCredsFromEnv() (*Creds, error) {
+func GetCredsFromEnv() (*DBCreds, error) {
 	user, ok := os.LookupEnv("DB_USER")
 	if !ok {
 		return nil, errors.New("no user specified in environment")
@@ -50,12 +50,12 @@ func GetCredsFromEnv() (*Creds, error) {
 
 	options := os.Getenv("DB_OPTN")
 
-	return &Creds{host, user, pass, port, dbname, options}, nil
+	return &DBCreds{host, user, pass, port, dbname, options}, nil
 }
 
 const dbConnectionTemplate = `postgres://%s:%s@%s:%s/%s`
 
-func (c Creds) ToConnectionString() string {
+func (c DBCreds) ToConnectionString() string {
 	connStr := fmt.Sprintf(dbConnectionTemplate, c.user, c.pass, c.host, c.port, c.dbname)
 
 	connStr = appendOptions(connStr, c.options)

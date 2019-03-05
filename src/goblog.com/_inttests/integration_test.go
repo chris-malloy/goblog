@@ -2,9 +2,11 @@ package _inttests
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"goblog.com/api/db"
 	"goblog.com/api/utils"
 	"io/ioutil"
 	"net/http"
@@ -98,4 +100,34 @@ func expectEmptyListAnd200(response *http.Response) {
 
 	err = json.NewDecoder(bytes.NewReader(body)).Decode(&null)
 	Expect(err).To(BeNil())
+}
+
+func getAndPingDB() *sql.DB {
+	creds, err := db.GetCredsFromEnv()
+	if err != nil {
+		GinkgoT().Fatalf("Caught error while getting DB creds: %v", err.Error())
+	}
+
+	db, err := db.NewDBConnection(creds)
+	if err != nil {
+		GinkgoT().Fatalf("Caught error while creating DB instance: %v", err.Error())
+	}
+
+	err = db.Ping()
+	if err != nil {
+		GinkgoT().Fatalf("Caught error while attempting to ping database: %v", err.Error())
+	}
+
+	return db
+}
+
+func 	clearTable(tableName string, db *sql.DB) {
+	results, err := db.Exec("DELETE FROM " + tableName)
+	if err != nil {
+		GinkgoT().Fatalf("Caught error while attempting to clear target table: %v", err.Error())
+	}
+
+	if count, _ := results.RowsAffected(); count == 0 {
+		GinkgoT().Fatalf("Unneeded table clear ran. No rows affected")
+	}
 }

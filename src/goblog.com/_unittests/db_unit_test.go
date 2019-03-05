@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-var _ = Describe("The Creds Function", func() {
+var _ = Describe("The DBCreds Function", func() {
 	Context("When not passed all necessary creds", func() {
 		It("Should fail with an error.", func() {
 			_, err := db.GetCredsFromEnv()
@@ -37,7 +37,7 @@ var _ = Describe("The Creds Function", func() {
 			os.Setenv("DB_OPTN", "sslmode=disable")
 			creds, err := db.GetCredsFromEnv()
 
-			Expect(err).To(BeNil(), "Creds error should be nil")
+			Expect(err).To(BeNil(), "DBCreds error should be nil")
 			Expect(creds.ToConnectionString()).To(ContainSubstring("sslmode=disable"))
 		})
 
@@ -52,7 +52,7 @@ var _ = Describe("The Creds Function", func() {
 
 		It("Should load a non-nil db", func() {
 			creds, err := db.GetCredsFromEnv()
-			Expect(err).To(BeNil(), fmt.Sprintf("Creds error should be nil but is %s", err))
+			Expect(err).To(BeNil(), fmt.Sprintf("DBCreds error should be nil but is %s", err))
 
 			db, err := db.NewDBConnection(creds)
 
