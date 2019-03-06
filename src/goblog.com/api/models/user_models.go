@@ -34,6 +34,7 @@ type userManger struct {
 
 type UserCRUD interface {
 	CreateUser(newUser NewUserRequest) (*User, error)
+	GetUserByEmail(email string) (*User, error)
 }
 
 func NewUserManager(db *sql.DB) (UserCRUD, error) {
@@ -42,11 +43,6 @@ func NewUserManager(db *sql.DB) (UserCRUD, error) {
 	}
 	return userManger{db}, nil
 }
-
-const createUserSQL = `
-    INSERT INTO users (first_name, last_name, email, encrypted_password, sign_in_count, last_sign_in_at, created_time_stamp, updated_time_stamp)
-    VALUES ($1, $2, $3, $4, 0, null, $5, null);
-`
 
 func (um userManger) CreateUser(newUser NewUserRequest) (*User, error) {
 	query, err := um.db.Prepare(createUserSQL)
@@ -69,5 +65,20 @@ func (um userManger) CreateUser(newUser NewUserRequest) (*User, error) {
 		return nil, fmt.Errorf("error: %v while creating user. No rows affected", err.Error())
 	} else {
 		return &User{FirstName: newUser.FirstName, LastName: newUser.LastName, Email: newUser.Email}, nil
+	}
+}
+
+func (um userManger) GetUserByEmail(email string) (*User, error) {
+	var who User
+	err := um.db.QueryRow(getUserByEmailSQL, email).Scan(
+		&who.ID, &who.Email, &who.FirstName, &who.LastName, &who.LastSignedInAt, &who.SignInCount)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	} else {
+		return &who, nil
 	}
 }
