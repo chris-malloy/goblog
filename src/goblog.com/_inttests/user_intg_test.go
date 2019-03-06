@@ -37,10 +37,29 @@ var _ = Describe("The user module", func() {
 			Expect(profile.SignInCount).To(Equal(0))
 		})
 
-		It("Should not return an error if the user isn't found should hackers can't poke at our database.", func() {
+		It("Should not return an error if the user isn't found so hackers can't poke at our database.", func() {
 			nonExistentProfile, err := userManger.SelectUserByEmail("thisdoesntexist@nowhere.com")
 			Expect(err).To(BeNil())
 			Expect(nonExistentProfile).To(BeNil())
+		})
+
+		It("Should update an existing user", func() {
+			updatedUser := models.User{
+				ID: userId,
+				Email: "christopher.updated@7factor.io",
+				FirstName: "ChrisChanged",
+				LastName: "MalloyChanged",
+			}
+
+			updatedProfile, err := userManger.UpdateUserById(userId, updatedUser)
+			Expect(err).To(BeNil())
+			Expect(updatedProfile).ToNot(BeNil())
+			Expect(updatedProfile.Email).To(Equal(updatedUser.Email))
+			Expect(updatedProfile.FirstName).To(Equal(updatedUser.FirstName))
+			Expect(updatedProfile.LastName).To(Equal(updatedUser.LastName))
+
+			Expect(updatedProfile.SignInCount).To(Equal(0))
+			Expect(updatedProfile.LastSignedInAt).To(BeNil())
 		})
 	})
 

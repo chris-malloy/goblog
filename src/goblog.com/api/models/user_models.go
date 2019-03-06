@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// used to create new users as well as update them
 type User struct {
 	ID             int64      `json:"id"`
 	FirstName      string     `json:"first_name"`
@@ -33,13 +34,15 @@ type userManger struct {
 }
 
 type UserCRUD interface {
-	InsertUser(newUser NewUserRequest) (*User, error)
+	InsertUser(payload NewUserRequest) (*User, error)
+	SelectUserById(userId int64) (*User, error)
 	SelectUserByEmail(email string) (*User, error)
+	UpdateUserById(userId int64, payload User) (*User, error)
 }
 
 func NewUserManager(db *sql.DB) (UserCRUD, error) {
 	if db == nil {
-		return nil, errors.New("cannot accept nil database handle")
+		return nil, errors.New("user manager error: cannot accept nil database handle")
 	}
 	return userManger{db}, nil
 }
@@ -47,38 +50,76 @@ func NewUserManager(db *sql.DB) (UserCRUD, error) {
 func (um userManger) InsertUser(newUser NewUserRequest) (*User, error) {
 	query, err := um.db.Prepare(insertUserSQL)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("inster user error: cannot prepare query: %v", err.Error())
 	}
 
 	hash, err := bcrypt.GenerateFromPassword(bytes.NewBufferString(newUser.Password).Bytes(), 10)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("inster user error: cannot generate password hash: %v", err.Error())
 	}
 
 	now := time.Now()
 	results, err := query.Exec(newUser.FirstName, newUser.LastName, newUser.Email, hash, now.Format(time.RFC3339))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("inster user error: cannot execute query: %v", err.Error())
 	}
 
-	if count, err := results.RowsAffected(); count != 1 {
+	if areRowsAffected(results) {
 		return nil, fmt.Errorf("error: %v while creating user. No rows affected", err.Error())
 	} else {
 		return um.SelectUserByEmail(newUser.Email)
 	}
 }
 
-func (um userManger) SelectUserByEmail(email string) (*User, error) {
+func (um userManger) SelectUserById(userId int64) (*User, error) {
 	var who User
-	err := um.db.QueryRow(selectUserSQL, email).Scan(
+	err := um.db.QueryRow(selectUserByIdSQL, userId).Scan(
 		&who.ID, &who.Email, &who.FirstName, &who.LastName, &who.LastSignedInAt, &who.SignInCount)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		} else {
-			return nil, err
+			return nil, fmt.Errorf("unexpected error while selecting user by id: %v", err.Error())
 		}
 	} else {
 		return &who, nil
 	}
+}
+
+func (um userManger) SelectUserByEmail(email string) (*User, error) {
+	var who User
+	err := um.db.QueryRow(selectUserByEmailSQL, email).Scan(
+		&who.ID, &who.Email, &who.FirstName, &who.LastName, &who.LastSignedInAt, &who.SignInCount)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, fmt.Errorf("unexpected error while selecting user by email: %v", err.Error())
+		}
+	} else {
+		return &who, nil
+	}
+}
+
+func (um userManger) UpdateUserById(userId int64, payload User) (*User, error) {
+	query, err := um.db.Prepare(updateUserByIdSQL)
+	if err != nil {
+		return nil, fmt.Errorf("update user by id error: can't prepare query: %v", err.Error())
+	}
+
+	results, err := query.Exec(userId, payload.Email, payload.FirstName, payload.LastName)
+	if err != nil {
+		return nil, fmt.Errorf("update user by id error: cannot execute query: %v", err.Error())
+	}
+
+	if areRowsAffected(results) {
+		return nil, fmt.Errorf("error: %v while updating user by id. No rows affected", err.Error())
+	} else {
+		return um.SelectUserById(userId)
+	}
+}
+
+func areRowsAffected(results sql.Result) bool {
+	count, _ := results.RowsAffected()
+	return count != 1
 }
