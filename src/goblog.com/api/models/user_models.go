@@ -38,6 +38,7 @@ type UserCRUD interface {
 	SelectUserById(userId int64) (*User, error)
 	SelectUserByEmail(email string) (*User, error)
 	UpdateUserById(userId int64, payload User) (*User, error)
+	DeleteUserById(userId int64) (bool, error)
 }
 
 func NewUserManager(db *sql.DB) (UserCRUD, error) {
@@ -64,7 +65,7 @@ func (um userManger) InsertUser(newUser NewUserRequest) (*User, error) {
 		return nil, fmt.Errorf("inster user error: cannot execute query: %v", err.Error())
 	}
 
-	if areRowsAffected(results) {
+	if !areRowsAffected(results) {
 		return nil, fmt.Errorf("error: %v while creating user. No rows affected", err.Error())
 	} else {
 		return um.SelectUserByEmail(newUser.Email)
@@ -112,14 +113,32 @@ func (um userManger) UpdateUserById(userId int64, payload User) (*User, error) {
 		return nil, fmt.Errorf("update user by id error: cannot execute query: %v", err.Error())
 	}
 
-	if areRowsAffected(results) {
+	if !areRowsAffected(results) {
 		return nil, fmt.Errorf("error: %v while updating user by id. No rows affected", err.Error())
 	} else {
 		return um.SelectUserById(userId)
 	}
 }
 
+func (um userManger) DeleteUserById(userId int64) (bool, error) {
+	query, err := um.db.Prepare(deleteUserByIdSQL)
+	if err != nil {
+		return false, fmt.Errorf("delete user by id error: can't prepare query: %v", err.Error())
+	}
+
+	results, err := query.Exec(userId)
+	if err != nil {
+		return false, fmt.Errorf("delete user by id error: cannot execute query: %v", err.Error())
+	}
+
+	if !areRowsAffected(results) {
+		return false, fmt.Errorf("error: %v while deleting user by id. No rows affected", err.Error())
+	} else {
+		return true, nil
+	}
+}
+
 func areRowsAffected(results sql.Result) bool {
 	count, _ := results.RowsAffected()
-	return count != 1
+	return count == 1
 }

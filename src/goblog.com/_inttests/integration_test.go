@@ -121,7 +121,7 @@ func getAndPingDB() *sql.DB {
 	return db
 }
 
-func 	clearTable(tableName string, db *sql.DB) {
+func clearTable(tableName string, db *sql.DB) {
 	results, err := db.Exec("DELETE FROM " + tableName)
 	if err != nil {
 		GinkgoT().Fatalf("Caught error while attempting to clear target table: %v", err.Error())

@@ -21,3 +21,8 @@ const updateUserByIdSQL = `
 	UPDATE users set email = $2, first_name = $3, last_name = $4, updated_time_stamp = NOW()
 	WHERE id = $1
 `
+
+const deleteUserByIdSQL = `
+	DELETE FROM users
+	WHERE id = $1
+`
