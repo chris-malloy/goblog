@@ -74,6 +74,12 @@ var _ = Describe("The user module", func() {
 				Expect(err).To(BeNil())
 				Expect(isUserDeleted).To(BeTrue())
 			})
+
+			It("Should return an error if the user to delete does not exist.", func() {
+				isSuccess, err := userManger.DeleteUserById(-1)
+				Expect(err).ToNot(BeNil())
+				Expect(isSuccess).To(BeFalse())
+			})
 		})
 	})
 

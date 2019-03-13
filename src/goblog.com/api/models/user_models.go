@@ -51,12 +51,12 @@ func NewUserManager(db *sql.DB) (UserCRUD, error) {
 func (um userManger) InsertUser(newUser NewUserRequest) (*User, error) {
 	query, err := um.db.Prepare(insertUserSQL)
 	if err != nil {
-		return nil, fmt.Errorf("inster user error: cannot prepare query: %v", err.Error())
+		return nil, fmt.Errorf("insert user error: cannot prepare query: %v", err.Error())
 	}
 
 	hash, err := bcrypt.GenerateFromPassword(bytes.NewBufferString(newUser.Password).Bytes(), 10)
 	if err != nil {
-		return nil, fmt.Errorf("inster user error: cannot generate password hash: %v", err.Error())
+		return nil, fmt.Errorf("insert user error: cannot generate password hash: %v", err.Error())
 	}
 
 	now := time.Now()
@@ -66,7 +66,7 @@ func (um userManger) InsertUser(newUser NewUserRequest) (*User, error) {
 	}
 
 	if !areRowsAffected(results) {
-		return nil, fmt.Errorf("error: %v while creating user. No rows affected", err.Error())
+		return nil, fmt.Errorf("insert user error: no rows affected while attempting to insert new user")
 	} else {
 		return um.SelectUserByEmail(newUser.Email)
 	}
@@ -114,7 +114,7 @@ func (um userManger) UpdateUserById(userId int64, payload User) (*User, error) {
 	}
 
 	if !areRowsAffected(results) {
-		return nil, fmt.Errorf("error: %v while updating user by id. No rows affected", err.Error())
+		return nil, fmt.Errorf("update user by id error: no rows affected while attempting to update user by id: user may not exist")
 	} else {
 		return um.SelectUserById(userId)
 	}
@@ -132,7 +132,7 @@ func (um userManger) DeleteUserById(userId int64) (bool, error) {
 	}
 
 	if !areRowsAffected(results) {
-		return false, fmt.Errorf("error: %v while deleting user by id. No rows affected", err.Error())
+		return false, fmt.Errorf("delete user by id error: no rows affected while attempting to delete user by id: user may not exist")
 	} else {
 		return true, nil
 	}
