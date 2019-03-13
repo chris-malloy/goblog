@@ -128,6 +128,6 @@ func clearTable(tableName string, db *sql.DB) {
 	}
 
 	if count, _ := results.RowsAffected(); count == 0 {
-		GinkgoT().Fatalf("Unneeded table clear ran. No rows affected")
+		GinkgoT().Logf("Unneeded table clear ran. No rows affected")
 	}
 }

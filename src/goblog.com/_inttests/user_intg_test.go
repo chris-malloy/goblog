@@ -6,17 +6,17 @@ import (
 	"goblog.com/api/models"
 )
 
-var newUserRequest = models.NewUserRequest{Email: "newuser@new.com", FirstName: "Chris", LastName: "Malloy", Password: "Abcde123@"}
+var newUserRequest = models.NewUserRequest{Email: "newuser@new.com", FirstName: "Test", LastName: "User", Password: "Abcde123@"}
 
 var _ = Describe("The user module", func() {
 	var userId int64
 	db := getAndPingDB()
 
-	BeforeSuite(func() {
+	BeforeEach(func() {
 		userId = insertTestUser(db)
 	})
 
-	Describe("When given a valid db handle and running user manager functions", func() {
+	Describe("Running the database manager methods", func() {
 		userManger, _ := models.NewUserManager(db)
 
 		Context("When running `INSERT` statements", func() {
@@ -77,7 +77,7 @@ var _ = Describe("The user module", func() {
 		})
 	})
 
-	AfterSuite(func() {
+	AfterEach(func() {
 		clearTable("users", db)
 	})
 })
