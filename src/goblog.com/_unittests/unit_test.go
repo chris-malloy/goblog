@@ -1,9 +1,11 @@
 package _unittests
 
 import (
+	"github.com/husobee/vestigo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"goblog.com/api/utils"
+	"net/http"
 	"testing"
 )
 
@@ -30,3 +32,12 @@ func passwordValidatorCallback(testCase string, shouldValidate bool) {
 	newValidator := utils.ValidatePassword(testCase)
 	checkValidator(newValidator, shouldValidate)
 }
+
+func mockCall(handler vestigo.Middleware) (http.HandlerFunc, bool) {
+	called := false
+	mockCall := func(writer http.ResponseWriter, request *http.Request) {
+		called = true
+	}
+	return handler(mockCall), called
+}
+
