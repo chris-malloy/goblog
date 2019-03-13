@@ -48,14 +48,14 @@ var _ = Describe("The user module", func() {
 		})
 
 		Context("When running `UPDATE` statements", func() {
-			It("Should update an existing user", func() {
-				updatedUser := models.User{
-					ID: userId,
-					Email: "christopher.updated@7factor.io",
-					FirstName: "ChrisChanged",
-					LastName: "MalloyChanged",
-				}
+			updatedUser := models.User{
+				ID: userId,
+				Email: "christopher.updated@7factor.io",
+				FirstName: "ChrisChanged",
+				LastName: "MalloyChanged",
+			}
 
+			It("Should update an existing user", func() {
 				updatedProfile, err := userManger.UpdateUserById(userId, updatedUser)
 				Expect(err).To(BeNil())
 				Expect(updatedProfile).ToNot(BeNil())
@@ -65,6 +65,12 @@ var _ = Describe("The user module", func() {
 
 				Expect(updatedProfile.SignInCount).To(Equal(0))
 				Expect(updatedProfile.LastSignedInAt).To(BeNil())
+			})
+
+			It("Should return an error if the user to update does not exist.", func() {
+				updatedProfile, err := userManger.UpdateUserById(-1, updatedUser)
+				Expect(err).ToNot(BeNil())
+				Expect(updatedProfile).To(BeNil())
 			})
 		})
 
@@ -76,9 +82,9 @@ var _ = Describe("The user module", func() {
 			})
 
 			It("Should return an error if the user to delete does not exist.", func() {
-				isSuccess, err := userManger.DeleteUserById(-1)
+				isUserDeleted, err := userManger.DeleteUserById(-1)
 				Expect(err).ToNot(BeNil())
-				Expect(isSuccess).To(BeFalse())
+				Expect(isUserDeleted).To(BeFalse())
 			})
 		})
 	})
