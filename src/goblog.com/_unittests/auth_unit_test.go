@@ -1,11 +1,13 @@
 package _unittests
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"goblog.com/api/handlers"
+	"goblog.com/api/models"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -78,6 +80,17 @@ var _ = Describe("JWT Authentication middleware functions", func() {
 
 			Expect(called).To(BeTrue())
 			Expect(recorder.Code).To(Equal(http.StatusOK))
+		})
+	})
+})
+
+var _ = Describe("The Authorizer", func() {
+	Context("When creating a new authorizer", func() {
+		It("Creates a new auth manager when passed a valid database handle.", func() {
+			db, _ := sql.Open("postgres", "postgres://nowhere:nowhere@localhost:5432/nothing")
+			authorizer, err := models.NewAuthManager(db)
+			Expect(err).To(BeNil())
+			Expect(authorizer).ToNot(BeNil())
 		})
 	})
 })
