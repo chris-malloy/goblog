@@ -1,8 +1,10 @@
-hash: 843625f9cd902f1d752dc093084fd0a0e60e5730e3445572ad75db9d8fcb4d72
-updated: 2019-02-23T15:24:08.367887-05:00
+hash: c2b1a0c798505bd053410d3f57d51512333f724411bb9752b6c0863f4bdb8f16
+updated: 2019-03-14T20:47:21.827504-04:00
 imports:
 - name: github.com/DATA-DOG/go-sqlmock
-  version: 472e287dbafe67e526a3797165b64cb14f34705a
+  version: 3f9954f6f6697845b082ca57995849ddf614f450
+- name: github.com/dgrijalva/jwt-go
+  version: 06ea1031745cb8b3dab3f6a236daf2b0aa468b7e
 - name: github.com/hpcloud/tail
   version: a30252cb686a21eb2d0b98132633053ec2f7f1e5
 - name: github.com/husobee/vestigo
@@ -14,14 +16,16 @@ imports:
   subpackages:
   - oid
 - name: github.com/onsi/ginkgo
-  version: 2e1be8f7d90e9d3e3e58b0ce470f2f14d075406f
+  version: eea6ad008b96acdaa524f5b409513bf062b500ad
 - name: github.com/onsi/gomega
-  version: 65fb64232476ad9046e57c26cd0bff3d3a8dc6cd
+  version: 90e289841c1ed79b7a598a7cd9959750cb5e89e2
 - name: github.com/sirupsen/logrus
-  version: e1e72e9de974bd926e5c56f83753fba2df402ce5
+  version: dae0fa8d5b0c810a8ab733fbd5510c7cae84eca4
 - name: golang.org/x/crypto
   version: 13931e22f9e72ea58bb73048bc752b48c6d4d4ac
   subpackages:
+  - bcrypt
+  - blowfish
   - ssh/terminal
 - name: golang.org/x/net
   version: 5ccada7d0a7ba9aeb5d3aca8d3501b4c2a509fec
