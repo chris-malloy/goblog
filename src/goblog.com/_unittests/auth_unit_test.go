@@ -85,12 +85,18 @@ var _ = Describe("JWT Authentication middleware functions", func() {
 })
 
 var _ = Describe("The Authorizer", func() {
-	Context("When creating a new authorizer", func() {
-		It("Creates a new auth manager when passed a valid database handle.", func() {
+	Context("When creating a new auth manager", func() {
+		It("Works with a valid database handle.", func() {
 			db, _ := sql.Open("postgres", "postgres://nowhere:nowhere@localhost:5432/nothing")
 			authorizer, err := models.NewAuthManager(db)
 			Expect(err).To(BeNil())
 			Expect(authorizer).ToNot(BeNil())
+		})
+
+		It("Fails with an invalid database handle.", func() {
+			authorizer, err := models.NewAuthManager(nil)
+			Expect(err).ToNot(BeNil())
+			Expect(authorizer).To(BeNil())
 		})
 	})
 })
