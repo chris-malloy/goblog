@@ -82,13 +82,13 @@ var _ = Describe("The Authorizer", func() {
 	Context("When creating a new auth manager", func() {
 		It("Works with a valid database handle.", func() {
 			db, _ := sql.Open("postgres", "postgres://nowhere:nowhere@localhost:5432/nothing")
-			authorizer, err := models.NewAuthManager(db)
+			authorizer, err := models.NewAuthorizer(db)
 			Expect(err).To(BeNil())
 			Expect(authorizer).ToNot(BeNil())
 		})
 
 		It("Fails with an invalid database handle.", func() {
-			authorizer, err := models.NewAuthManager(nil)
+			authorizer, err := models.NewAuthorizer(nil)
 			Expect(err).ToNot(BeNil())
 			Expect(authorizer).To(BeNil())
 		})
