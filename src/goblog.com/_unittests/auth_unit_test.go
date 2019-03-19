@@ -9,7 +9,6 @@ import (
 	"goblog.com/api/handlers"
 	"goblog.com/api/models"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"time"
 )
@@ -26,13 +25,13 @@ var _ = Describe("JWT Authentication middleware functions", func() {
 			handler := handlers.RequireLogin()
 			server := handler(func(writer http.ResponseWriter, request *http.Request) {
 				called = true
-				writer.WriteHeader(http.StatusOK)
+				writer.WriteHeader(http.StatusUnauthorized)
 			})
 
-			request, _ := http.NewRequest("GET", "/thisdoesnotmatter", nil)
-			request.Header.Set("Authorization", "thisisinvalid")
+			request, recorder := mockRequestAndRecorder()
 
-			recorder := httptest.NewRecorder()
+			mockInvalidAuthorizationHeader(request)
+
 			server.ServeHTTP(recorder, request)
 
 			Expect(called).To(BeFalse())
@@ -44,11 +43,11 @@ var _ = Describe("JWT Authentication middleware functions", func() {
 			handler := handlers.RequireLogin()
 			server := handler(func(writer http.ResponseWriter, request *http.Request) {
 				called = true
-				writer.WriteHeader(http.StatusOK)
+				writer.WriteHeader(http.StatusUnauthorized)
 			})
 
-			request, _ := http.NewRequest("GET", "/thisdoesnotmattter", nil)
-			recorder := httptest.NewRecorder()
+			request, recorder := mockRequestAndRecorder()
+
 			server.ServeHTTP(recorder, request)
 
 			Expect(called).To(BeFalse())
@@ -63,19 +62,14 @@ var _ = Describe("JWT Authentication middleware functions", func() {
 				writer.WriteHeader(http.StatusOK)
 			})
 
-			secret, _ := os.LookupEnv("JWT_SECRET")
-			mockClaims := jwt.MapClaims{
-				"sub": 1,
-				"iat": time.Now().Unix(),
-				"exp": time.Now().Add(time.Hour * 4).Unix(),
-			}
+			secret, mockClaims := mockJWTClaims()
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, mockClaims)
 			tokenString, _ := token.SignedString([]byte(secret))
 
-			request, _ := http.NewRequest("GET", "/thisdoesnotmatter", nil)
-			request.Header.Set("Authorization", "Bearer "+tokenString)
+			request, recorder := mockRequestAndRecorder()
 
-			recorder := httptest.NewRecorder()
+			mockValidAuthorizationHeader(request, tokenString)
+
 			server.ServeHTTP(recorder, request)
 
 			Expect(called).To(BeTrue())
@@ -100,3 +94,21 @@ var _ = Describe("The Authorizer", func() {
 		})
 	})
 })
+
+func mockInvalidAuthorizationHeader(request *http.Request) {
+	request.Header.Set("Authorization", "thisisinvalid")
+}
+
+func mockValidAuthorizationHeader(request *http.Request, tokenString string) {
+	request.Header.Set("Authorization", "Bearer "+tokenString)
+}
+
+func mockJWTClaims() (string, jwt.Claims) {
+	secret, _ := os.LookupEnv("JWT_SECRET")
+	mockClaims := jwt.MapClaims{
+		"sub": 1,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Hour * 4).Unix(),
+	}
+	return secret, mockClaims
+}
