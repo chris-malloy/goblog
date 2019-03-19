@@ -20,13 +20,3 @@ func checkValidator(validator utils.Validator, shouldValidate bool) {
 		Expect(validator.ErrMsg).To(BeAssignableToTypeOf(utils.ValidationError{}))
 	}
 }
-
-func emailValidatorCallback(testCase string, shouldValidate bool) {
-	newValidator := utils.ValidateEmail(testCase)
-	checkValidator(newValidator, shouldValidate)
-}
-
-func passwordValidatorCallback(testCase string, shouldValidate bool) {
-	newValidator := utils.ValidatePassword(testCase)
-	checkValidator(newValidator, shouldValidate)
-}

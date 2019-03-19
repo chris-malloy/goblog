@@ -13,6 +13,16 @@ var badEmailRequest = models.NewUserRequest{Email: "not an email", FirstName: "C
 var badPasswordRequest = models.NewUserRequest{Email: "goodemail@good.com", FirstName: "Chris", LastName: "Malloy", Password: "badpassword"}
 var goodUserRequest = models.NewUserRequest{Email: "goodemail@good.com", FirstName: "Chris", LastName: "Malloy", Password: "Abdcef123@"}
 
+func emailValidatorCallback(testCase string, shouldValidate bool) {
+	newValidator := utils.ValidateEmail(testCase)
+	checkValidator(newValidator, shouldValidate)
+}
+
+func passwordValidatorCallback(testCase string, shouldValidate bool) {
+	newValidator := utils.ValidatePassword(testCase)
+	checkValidator(newValidator, shouldValidate)
+}
+
 var _ = Describe("User Functions", func() {
 	DescribeTable("When validating an email address", emailValidatorCallback,
 		Entry("it validates a good email.", "christopher.malloy@7factor.io", true),
