@@ -25,7 +25,19 @@ var _ = Describe("The Authorization Module", func() {
 			Expect(err).To(BeNil())
 			Expect(ok).To(BeTrue())
 		})
+
+		It("Should not log users in and fail when given an invalid password.", func() {
+			ok, err := authorizer.Authenticate(models.LoginRequest{
+				Email: "christopher.malloy@7factor.io",
+				Password: "badpassword",
+			})
+
+			Expect(err).ToNot(BeNil())
+			Expect(ok).To(BeFalse())
+		})
+
+		AfterEach(func() {
+			clearTable("users", db)
+		})
 	})
-
-
 })

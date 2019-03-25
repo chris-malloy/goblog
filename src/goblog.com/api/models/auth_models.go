@@ -3,6 +3,8 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginRequest struct {
@@ -26,5 +28,16 @@ func NewAuthorizer(db *sql.DB) (Authorizer, error) {
 }
 
 func (am authManager) Authenticate(challenge LoginRequest) (bool, error) {
+	var encryptedPassword string
+	err := am.db.QueryRow(getEncryptedPasswordSQL, challenge.Email).Scan(&encryptedPassword)
+	if err != nil {
+		return false, fmt.Errorf("authentication error: %v", err.Error())
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(encryptedPassword), []byte(challenge.Password))
+	if err != nil {
+		return false, fmt.Errorf("authentication error: %v", err.Error())
+	}
+
 	return true, nil
 }

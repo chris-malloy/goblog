@@ -26,3 +26,9 @@ const deleteUserByIdSQL = `
 	DELETE FROM users
 	WHERE id = $1;
 `
+
+const getEncryptedPasswordSQL = `
+	SELECT encrypted_password
+	FROM users
+	WHERE email = $1;
+`
