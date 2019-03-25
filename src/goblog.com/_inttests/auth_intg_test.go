@@ -36,6 +36,16 @@ var _ = Describe("The Authorization Module", func() {
 			Expect(ok).To(BeFalse())
 		})
 
+		It("Should not log users in and fail when given and unknown user email.", func() {
+			ok, err := authorizer.Authenticate(models.LoginRequest{
+				Email: "thisdoesnotexist@nowhere.com",
+				Password: "notthepassword",
+			})
+
+			Expect(err).ToNot(BeNil())
+			Expect(ok).To(BeFalse())
+		})
+
 		AfterEach(func() {
 			clearTable("users", db)
 		})

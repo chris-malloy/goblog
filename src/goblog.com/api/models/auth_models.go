@@ -31,12 +31,12 @@ func (am authManager) Authenticate(challenge LoginRequest) (bool, error) {
 	var encryptedPassword string
 	err := am.db.QueryRow(getEncryptedPasswordSQL, challenge.Email).Scan(&encryptedPassword)
 	if err != nil {
-		return false, fmt.Errorf("authentication error: %v", err.Error())
+		return false, fmt.Errorf("authentication error calling QueryRow: %v", err.Error())
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(encryptedPassword), []byte(challenge.Password))
 	if err != nil {
-		return false, fmt.Errorf("authentication error: %v", err.Error())
+		return false, fmt.Errorf("authentication error calling CompareHashAndPassword: %v", err.Error())
 	}
 
 	return true, nil
