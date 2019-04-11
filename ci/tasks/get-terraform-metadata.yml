@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: stedolan/jq
+
+inputs:
+  - name: terraformer
+
+outputs:
+  - name: tf-metadata
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      echo $(cat terraformer/metadata) | jq --raw-output .lb_hostname > tf-metadata/lb-hostname
+      echo $(cat terraformer/metadata) | jq --raw-output .health_check_path > tf-metadata/health-check-path

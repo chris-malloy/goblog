@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: 7factor/env-to-ecs
+
+inputs:
+  - name: goblog-src
+
+outputs:
+  - name: ecs-env-blob
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      /go/bin/cmd -i goblog-src/env/${ENV}/${ENV}.env -o ecs-env-blob/output.json

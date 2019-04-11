@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: byrnedo/alpine-curl
+
+inputs:
+  - name: goblog-src
+  - name: tf-metadata
+
+outputs:
+  - name: curl-server-output
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      goblog-src/ci/scripts/curl_server.sh $(cat tf-metadata/lb-hostname) $(cat tf-metadata/health-check-path) &> curl-server-output/alert-server-is-down.txt

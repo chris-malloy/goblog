@@ -1,0 +1,260 @@
+---
+resource_types:
+  - name: terraform
+    type: docker-image
+    source:
+      repository: 7factor/terraform-resource
+
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+      tag: latest
+
+# We care when the source, ci/scripts, and ci/tasks code changes.
+resources:
+  - name: goblog-src
+    type: git
+    source:
+      paths:
+        - src/**
+        - env/**
+        - ci/scripts/**
+        - ci/tasks/**
+      branch: master
+      uri: ((git-repositories.goblog-uri))
+      private_key: ((git-repositories.goblog-key))
+
+  # We will use this trigger on changes to the terraform directory for
+  # re-deployment of a current artifact. This gets the same source as the
+  # src item above, it just triggers on something different.
+  - name: goblog-terraform
+    type: git
+    source:
+      paths:
+        - ci/terraform/**
+      branch: master
+      uri: ((git-repositories.goblog-uri))
+      private_key: ((git-repositories.goblog-key))
+
+  - name: goblog-image
+    type: docker-image
+    source:
+      repository: ((ecr-repositories.goblog))
+
+  - name: terraformer
+    type: terraform
+    source:
+      backend_type: s3
+      backend_config:
+        bucket: ((aws.terraform-bucket))
+        key: ((aws-region))/terraform.tfstate
+        region: ((aws-region))
+      env:
+        AWS_DEFAULT_REGION: ((aws-region))
+
+  - name: curl-server-timer
+    type: time
+    source: {interval: 5m}
+
+  - name: alert-server-is-down
+    type: slack-notification
+    source:
+      url: ((slack-webhooks.alert-channel))
+
+groups:
+  - name: deployments
+    jobs:
+      - unit-tests
+      - build-rc
+      - deploy-stage
+      - deploy-prod
+  - name: destroy-deployments
+    jobs:
+      - destroy-stage
+      - destroy-prod
+  - name: curl-servers
+    jobs:
+      - curl-stage-server
+      - curl-prod-server
+
+jobs:
+
+  #####################
+  ##     TESTING     ##
+  #####################
+
+  - name: unit-tests
+    build_logs_to_retain: 50
+    serial_groups: [staging]
+    plan:
+      - get: goblog-src
+        trigger: true
+      - task: unit-tests
+        file: goblog-src/ci/tasks/unit-tests.yml
+
+  #####################
+  ##     BUILD       ##
+  #####################
+
+  - name: build-rc
+    build_logs_to_retain: 50
+    serial_groups: [staging]
+    plan:
+      - get: goblog-src
+        trigger: true
+        passed: [unit-tests]
+      - put: goblog-image
+        params:
+          tag_as_latest: false
+          build: goblog-src
+          dockerfile: goblog-src/env/Dockerfile
+          additional_tags: goblog-src/.git/short_ref
+        get_params:
+          skip_download: true
+
+  ##########################
+  ## TERRAFORM DEPLOYMENT ##
+  ##########################
+
+  # We want to deploy only if there's new terraform or an
+  # updated image--hence the git path magic.
+  - name: deploy-stage
+    build_logs_to_retain: 50
+    serial_groups: [staging]
+    plan:
+      - aggregate:
+          - get: goblog-src
+          - get: goblog-terraform
+            trigger: true
+          - get: goblog-image
+            passed: [build-rc]
+            trigger: true
+            params:
+              skip_download: true
+      - task: env-to-ecs
+        file: goblog-src/ci/tasks/env-to-ecs.yml
+        params:
+          ENV: stage
+      - put: terraformer
+        params:
+          terraform_source: goblog-terraform/ci/terraform/ecs/stage
+          env_name: goblog-ecs-stage
+          vars:
+            ecr_tag: goblog-src/.git/short_ref
+            ecr_uri: ((ecr-repositories.goblog))
+            deploy_to_account: ((aws.dev-account-id))
+            ecs_env_blob: ecs-env-blob/output.json
+
+  # A production deploy has everything, so no need to filter based
+  # on terraform or whatever. It's 100% manual.
+  - name: deploy-prod
+    build_logs_to_retain: 50
+    serial_groups: [prod]
+    plan:
+      - aggregate:
+          - get: goblog-src
+            passed: [deploy-stage]
+          - get: goblog-terraform
+            passed: [deploy-stage]
+          - get: goblog-image
+            passed: [deploy-stage]
+            params:
+              skip_download: true
+      - task: env-to-ecs
+        file: goblog-src/ci/tasks/env-to-ecs.yml
+        params:
+          ENV: prod
+      - put: terraformer
+        params:
+          terraform_source: goblog-terraform/ci/terraform/ecs/prod
+          env_name: goblog-ecs-prod
+          vars:
+            ecr_tag: goblog-src/.git/short_ref
+            ecr_uri: ((ecr-repositories.goblog))
+            deploy_to_account: ((aws.prod-account-id))
+            ecs_env_blob: ecs-env-blob/output.json
+
+  #########################
+  ## DESTROY DEPLOYMENTS ##
+  #########################
+
+  - name: destroy-stage
+    build_logs_to_retain: 50
+    serial_groups: [staging]
+    plan:
+      - get: goblog-terraform
+      - put: terraformer
+        params:
+          terraform_source: goblog-terraform/ci/terraform/ecs/stage
+          env_name: goblog-ecs-stage
+          vars:
+            deploy_to_account: ((aws.dev-account-id))
+            ecr_tag:
+            ecr_uri:
+          action: destroy
+        get_params:
+          action: destroy
+
+  - name: destroy-prod
+    build_logs_to_retain: 50
+    serial_groups: [prod]
+    plan:
+      - get: goblog-terraform
+      - put: terraformer
+        params:
+          terraform_source: goblog-terraform/ci/terraform/ecs/prod
+          env_name: goblog-ecs-prod
+          vars:
+            deploy_to_account: ((aws.prod-account-id))
+            ecr_tag:
+            ecr_uri:
+          action: destroy
+        get_params:
+          action: destroy
+
+  ##########################
+  ##     CURL SERVERS     ##
+  ##########################
+
+  - name: curl-stage-server
+    build_logs_to_retain: 10
+    serial_groups: [staging]
+    plan:
+      - aggregate:
+          - get: goblog-src
+          - get: terraformer
+            passed: [deploy-stage]
+          - get: curl-server-timer
+            trigger: true
+      - task: get-terraform-metadata
+        file: goblog-src/ci/tasks/get-terraform-metadata.yml
+      - task: curl-server
+        file: goblog-src/ci/tasks/curl-server.yml
+
+  - name: curl-prod-server
+    build_logs_to_retain: 10
+    serial_groups: [prod]
+    plan:
+      - aggregate:
+          - get: goblog-src
+          - get: terraformer
+            passed: [deploy-prod]
+          - get: curl-server-timer
+            trigger: true
+      - task: get-terraform-metadata
+        file: goblog-src/ci/tasks/get-terraform-metadata.yml
+      - task: curl-server
+        file: goblog-src/ci/tasks/curl-server.yml
+        on_failure:
+          put: alert-server-is-down
+          params:
+            silent: true
+            text_file: curl-server-output/alert-server-is-down.txt
+            text: |
+              Golang Starter is Down! Check it out at:
+              https://ci.7fdev.io/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+              or at:
+              https://ci.7fdev.io/builds/$BUILD_ID
+
+              Result: $TEXT_FILE_CONTENT
