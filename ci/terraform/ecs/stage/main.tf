@@ -31,7 +31,7 @@ module "ecs_task" {
 
   # Load balancers and health checking
   health_check_path = "/status"
-  lb_cert_arn       = ""
+  lb_cert_arn       = "arn:aws:acm:us-east-1:699685875237:certificate/d9a14cdd-584e-4f83-9781-c1830093c450"
   lb_public_subnets = ["subnet-0182cc1f48d477fcd", "subnet-0861c153d5dab246b"]
   cluster_lb_sg_id  = "${data.aws_security_group.access_sg.id}"
 
