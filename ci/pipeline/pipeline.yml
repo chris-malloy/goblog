@@ -42,12 +42,23 @@ resources:
     source:
       repository: ((ecr-repositories.goblog))
 
-  - name: terraformer
+  - name: terraformer-stage
     type: terraform
     source:
       backend_type: s3
       backend_config:
-        bucket: ((aws.terraform-bucket))
+        bucket: ((aws.dev-terraform-bucket))
+        key: ((aws-region))/terraform.tfstate
+        region: ((aws-region))
+      env:
+        AWS_DEFAULT_REGION: ((aws-region))
+
+  - name: terraformer-prod
+    type: terraform
+    source:
+      backend_type: s3
+      backend_config:
+        bucket: ((aws.prod-terraform-bucket))
         key: ((aws-region))/terraform.tfstate
         region: ((aws-region))
       env:
@@ -136,7 +147,7 @@ jobs:
         file: goblog-src/ci/tasks/env-to-ecs.yml
         params:
           ENV: stage
-      - put: terraformer
+      - put: terraformer-stage
         params:
           terraform_source: goblog-terraform/ci/terraform/ecs/stage
           env_name: goblog-ecs-stage
@@ -165,7 +176,7 @@ jobs:
         file: goblog-src/ci/tasks/env-to-ecs.yml
         params:
           ENV: prod
-      - put: terraformer
+      - put: terraformer-prod
         params:
           terraform_source: goblog-terraform/ci/terraform/ecs/prod
           env_name: goblog-ecs-prod
@@ -184,7 +195,7 @@ jobs:
     serial_groups: [staging]
     plan:
       - get: goblog-terraform
-      - put: terraformer
+      - put: terraformer-stage
         params:
           terraform_source: goblog-terraform/ci/terraform/ecs/stage
           env_name: goblog-ecs-stage
@@ -201,7 +212,7 @@ jobs:
     serial_groups: [prod]
     plan:
       - get: goblog-terraform
-      - put: terraformer
+      - put: terraformer-prod
         params:
           terraform_source: goblog-terraform/ci/terraform/ecs/prod
           env_name: goblog-ecs-prod
@@ -223,7 +234,7 @@ jobs:
     plan:
       - aggregate:
           - get: goblog-src
-          - get: terraformer
+          - get: terraformer-stage
             passed: [deploy-stage]
           - get: curl-server-timer
             trigger: true
@@ -238,7 +249,7 @@ jobs:
     plan:
       - aggregate:
           - get: goblog-src
-          - get: terraformer
+          - get: terraformer-prod
             passed: [deploy-prod]
           - get: curl-server-timer
             trigger: true
