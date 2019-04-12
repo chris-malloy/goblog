@@ -27,7 +27,7 @@ module "ecs_task" {
   # Information about what we're deploying
   app_name         = "${var.app_name}"
   app_port         = "${var.app_port}"
-  service_role_arn = "arn:aws:iam::${var.deploy_to_account}:role/RoleForECSCluster-dev-cluster"
+  service_role_arn = "arn:aws:iam::${var.deploy_to_account}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
 
   # Load balancers and health checking
   health_check_path = "/status"
