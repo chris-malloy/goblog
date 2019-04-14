@@ -1,9 +1,13 @@
 package _inttests
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"goblog.com/api/models"
+	"net/http"
 )
 
 var newUserRequest = models.NewUserRequest{Email: "newuser@new.com", FirstName: "Test", LastName: "User", Password: "Abcde123@"}
@@ -85,6 +89,41 @@ var _ = Describe("The user module", func() {
 				isUserDeleted, err := userManger.DeleteUserById(-1)
 				Expect(err).ToNot(BeNil())
 				Expect(isUserDeleted).To(BeFalse())
+			})
+		})
+	})
+
+	Describe("The User Handler methods", func() {
+		Context("When calling the POST new user route", func() {
+			It("Should create a new user when given a valid body.", func() {
+				newUser := models.NewUserRequest{
+					Email:     randSeq(10) + "@gmail.com",
+					FirstName: "Chris",
+					LastName:  "Malloy",
+					Password:  "ABCd1234&"}
+				response := post("/users", newUser)
+				ensureAndValidatePayload(response, http.StatusCreated, func(body []byte) {
+					var fetchedUser models.User
+					err := json.NewDecoder(bytes.NewReader(body)).Decode(&fetchedUser)
+					Expect(err).To(BeNil())
+					Expect(fetchedUser.Email).To(Equal(newUser.Email))
+					Expect(fetchedUser.FirstName).To(Equal(newUser.FirstName))
+					Expect(fetchedUser.LastName).To(Equal(newUser.LastName))
+				})
+			})
+		})
+
+		Context("When calling the GET users by id route", func() {
+			It("Should return an existing user", func() {
+				response := get(fmt.Sprintf("/users/%v", userId))
+				ensureAndValidatePayload(response, http.StatusOK, func(body []byte) {
+					var fetchedUser models.User
+					err := json.NewDecoder(bytes.NewReader(body)).Decode(&fetchedUser)
+					Expect(err).To(BeNil())
+					Expect(fetchedUser.Email).To(Equal("christopher.malloy@7factor.io"))
+					Expect(fetchedUser.FirstName).To(Equal("Chris"))
+					Expect(fetchedUser.LastName).To(Equal("Malloy"))
+				})
 			})
 		})
 	})

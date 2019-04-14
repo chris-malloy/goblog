@@ -9,6 +9,7 @@ import (
 	"goblog.com/api/db"
 	"goblog.com/api/utils"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -119,6 +120,16 @@ func getAndPingDB() *sql.DB {
 	}
 
 	return db
+}
+
+// Useful for creating new random sequences for unique usernames and whatnot.
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }
 
 func clearTable(tableName string, db *sql.DB) {
