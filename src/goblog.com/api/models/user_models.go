@@ -39,6 +39,7 @@ type UserCRUD interface {
 	SelectUserByEmail(email string) (*User, error)
 	UpdateUserById(userId int64, payload User) (*User, error)
 	DeleteUserById(userId int64) (bool, error)
+	DoLoginBookkeeping(email string) error
 }
 
 func NewUserManager(db *sql.DB) (UserCRUD, error) {
@@ -135,6 +136,17 @@ func (um userManger) DeleteUserById(userId int64) (bool, error) {
 		return false, fmt.Errorf("delete user by id error: no rows affected while attempting to delete user by id: user may not exist")
 	} else {
 		return true, nil
+	}
+}
+
+func (um userManger) DoLoginBookkeeping(email string) error {
+	results, err := um.db.Exec(updateUserAfterLoginSQL, email)
+	if err != nil {
+		return err
+	} else if !areRowsAffected(results) {
+		return errors.New("call bookkeeping for user failed: no rows affected")
+	} else {
+		return nil
 	}
 }
 

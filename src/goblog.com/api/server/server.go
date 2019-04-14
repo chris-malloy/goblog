@@ -4,6 +4,7 @@ import (
 	"github.com/husobee/vestigo"
 	log "github.com/sirupsen/logrus"
 	"goblog.com/api/db"
+	"goblog.com/api/handlers"
 	"goblog.com/api/healthcheck"
 	"net/http"
 	"os"
@@ -28,10 +29,17 @@ func main() {
 
 	// set up all of the database connections
 	dbConn := db.GetDBOrPanic()
+	authorizer := db.GetAuthorizerOrPanic(dbConn)
+	userManager := db.GetUserManagerOrPanic(dbConn)
 
 	// Please note that patterns for the URLs below must match
 	// EXACTLY, including no trailing slashes.
 	router.Get("/status", healthcheck.HealthCheck())
 	router.Get("/dbaccess", healthcheck.DBAccess(dbConn))
+
+	router.Post("/users", handlers.CreateUser(authorizer, userManager))
+	router.Post("/login", handlers.Login(authorizer, userManager))
+
+	router.Get("/users/:userId", handlers.GetUserById(userManager), handlers.RequireLogin())
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }

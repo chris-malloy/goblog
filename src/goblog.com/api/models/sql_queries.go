@@ -32,3 +32,9 @@ const getEncryptedPasswordSQL = `
 	FROM users
 	WHERE email = $1;
 `
+
+const updateUserAfterLoginSQL = `
+	UPDATE users 
+	SET last_sign_in_at = now(), updated_time_stamp = now(), sign_in_count = sign_in_count + 1 
+	WHERE email = $1
+`
